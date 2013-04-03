@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 type twitterResult struct {
@@ -18,7 +19,10 @@ type twitterResult struct {
 	}
 }
 
-var twitterUrl = "http://search.twitter.com/search.json?q=%23KOT"
+var (
+  twitterUrl = "http://search.twitter.com/search.json?q=%23UCL"
+  pauseDuration = 5 * time.Second
+)
 
 func retrieveTweets(c chan<- *twitterResult) {
 	for {
@@ -29,12 +33,13 @@ func retrieveTweets(c chan<- *twitterResult) {
 
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
-		r := new(twitterResult)
+		r := new(twitterResult) //or &twitterResult{} which returns *twitterResult
 		err = json.Unmarshal(body, &r)
 		if err != nil {
 			log.Fatal(err)
 		}
 		c <- r
+		time.Sleep(pauseDuration)
 	}
 
 }
