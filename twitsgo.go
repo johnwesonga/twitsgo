@@ -31,20 +31,20 @@ func retrieveTweets(c chan<- *twitterResult) {
 		body, err := ioutil.ReadAll(resp.Body)
 		r := new(twitterResult)
 		err = json.Unmarshal(body, &r)
-    if err != nil{
-      log.Fatal(err)
-    }	
+		if err != nil {
+			log.Fatal(err)
+		}
 		c <- r
 	}
 
 }
 
 func displayTweets(c chan *twitterResult) {
-  tweets := <-c
-  for _, v := range tweets.Results{
-    fmt.Printf("%v:%v\n", v.Username, v.Text)
-  }
-	
+	tweets := <-c
+	for _, v := range tweets.Results {
+		fmt.Printf("%v:%v\n", v.Username, v.Text)
+	}
+
 }
 
 func main() {
