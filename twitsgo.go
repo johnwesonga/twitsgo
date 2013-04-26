@@ -1,4 +1,4 @@
-package main
+package twitsgo
 
 import (
 	"encoding/json"
@@ -20,8 +20,8 @@ type twitterResult struct {
 }
 
 var (
-  twitterUrl = "http://search.twitter.com/search.json?q=%23UCL"
-  pauseDuration = 5 * time.Second
+	twitterUrl    = "http://search.twitter.com/search.json?q=%23UCL"
+	pauseDuration = 5 * time.Second
 )
 
 func retrieveTweets(c chan<- *twitterResult) {
@@ -44,6 +44,26 @@ func retrieveTweets(c chan<- *twitterResult) {
 
 }
 
+func downloadTweets() (*twitterResult, error) {
+	c := make(chan *twitterResult)
+	r := new(twitterResult) //or &twitterResult{} which returns *twitterResult
+	for {
+		resp, err := http.Get(twitterUrl)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		err = json.Unmarshal(body, &r)
+		if err != nil {
+			log.Fatal(err)
+		}
+		c <- r
+	}
+	return r, nil
+}
 func displayTweets(c chan *twitterResult) {
 	tweets := <-c
 	for _, v := range tweets.Results {
@@ -54,7 +74,8 @@ func displayTweets(c chan *twitterResult) {
 
 func main() {
 	c := make(chan *twitterResult)
-	go retrieveTweets(c)
+	//go retrieveTweets(c)
+	go downloadTweets()
 	for {
 		displayTweets(c)
 	}
