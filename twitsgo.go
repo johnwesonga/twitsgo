@@ -24,7 +24,7 @@ var (
 	pauseDuration = 5 * time.Second
 )
 
-func retrieveTweets(c chan<- *twitterResult) {
+func RetrieveTweets(c chan<- *twitterResult) {
 	for {
 		resp, err := http.Get(twitterUrl)
 		if err != nil {
@@ -34,7 +34,7 @@ func retrieveTweets(c chan<- *twitterResult) {
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		r := new(twitterResult) //or &twitterResult{} which returns *twitterResult
-		err = json.Unmarshal(body, &r)
+		err = json.Unmarshal(body, r)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -44,7 +44,7 @@ func retrieveTweets(c chan<- *twitterResult) {
 
 }
 
-func downloadTweets() (*twitterResult, error) {
+func DownloadTweets() (*twitterResult, error) {
 	c := make(chan *twitterResult)
 	r := new(twitterResult) //or &twitterResult{} which returns *twitterResult
 	for {
@@ -64,7 +64,7 @@ func downloadTweets() (*twitterResult, error) {
 	}
 	return r, nil
 }
-func displayTweets(c chan *twitterResult) {
+func DisplayTweets(c chan *twitterResult) {
 	tweets := <-c
 	for _, v := range tweets.Results {
 		fmt.Printf("%v:%v\n", v.Username, v.Text)
@@ -75,9 +75,9 @@ func displayTweets(c chan *twitterResult) {
 func main() {
 	c := make(chan *twitterResult)
 	//go retrieveTweets(c)
-	go downloadTweets()
+	go DownloadTweets()
 	for {
-		displayTweets(c)
+		DisplayTweets(c)
 	}
 
 }
